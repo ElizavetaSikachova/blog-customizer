@@ -1,16 +1,141 @@
+import { CSSProperties, useEffect, useRef, useState } from 'react';
+import clsx from 'clsx';
 import { ArrowButton } from 'src/ui/arrow-button';
 import { Button } from 'src/ui/button';
+import { Select } from 'src/ui/select';
+import { RadioGroup } from 'src/ui/radio-group';
+import { Separator } from 'src/ui/separator';
+import { Text } from 'src/ui/text';
+import { useOutsideClickClose } from 'src/ui/select/hooks/useOutsideClickClose';
+import {
+	defaultArticleState,
+	ArticleStateType,
+	fontFamilyOptions,
+	fontColors,
+	backgroundColors,
+	contentWidthArr,
+	fontSizeOptions,
+} from 'src/constants/articleProps';
 
 import styles from './ArticleParamsForm.module.scss';
 
-export const ArticleParamsForm = () => {
+type ArticleParamsFormProps = {
+	articleState: ArticleStateType;
+	onApply: (state: ArticleStateType) => void;
+};
+
+export const ArticleParamsForm = ({
+	articleState,
+	onApply,
+}: ArticleParamsFormProps) => {
+	const [isOpen, setIsOpen] = useState<boolean>(false);
+	const [formState, setFormState] = useState<ArticleStateType>(articleState);
+	const containerRef = useRef<HTMLDivElement>(null);
+
+	useOutsideClickClose({
+		isOpen,
+		rootRef: containerRef,
+		onChange: setIsOpen,
+	});
+
+	// Синхронизируем formState с articleState при его изменении
+	useEffect(() => {
+		setFormState(articleState);
+	}, [articleState]);
+
+	const handleArrowButtonClick = () => {
+		setIsOpen((prevState) => !prevState);
+	};
+
+	const handleApply = (event: React.FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+		onApply(formState);
+		setIsOpen(false);
+	};
+
+	const handleReset = () => {
+		setFormState(defaultArticleState);
+		onApply(defaultArticleState);
+	};
+
 	return (
 		<>
-			<ArrowButton isOpen={false} onClick={() => {}} />
-			<aside className={styles.container}>
-				<form className={styles.form}>
+			<ArrowButton isOpen={isOpen} onClick={handleArrowButtonClick} />
+			<aside
+				className={clsx(styles.container, { [styles.container_open]: isOpen })}
+				ref={containerRef}>
+				<form className={styles.form} onSubmit={handleApply}>
+					<Text
+						size={45}
+						weight={800}
+						uppercase
+						family='open-sans'>
+						Задайте параметры
+					</Text>
+					<Select
+						title='Шрифт'
+						selected={formState.fontFamilyOption}
+						options={fontFamilyOptions}
+						onChange={(selected) =>
+							setFormState((prevState) => ({
+								...prevState,
+								fontFamilyOption: selected,
+							}))
+						}
+					/>
+					<RadioGroup
+						title='Размер шрифта'
+						name='fontSize'
+						options={fontSizeOptions}
+						selected={formState.fontSizeOption}
+						onChange={(selected) =>
+							setFormState((prevState) => ({
+								...prevState,
+								fontSizeOption: selected,
+							}))
+						}
+					/>
+					<Select
+						title='Цвет шрифта'
+						selected={formState.fontColor}
+						options={fontColors}
+						onChange={(selected) =>
+							setFormState((prevState) => ({
+								...prevState,
+								fontColor: selected,
+							}))
+						}
+					/>
+					<Separator />
+					<Select
+						title='Цвет фона'
+						selected={formState.backgroundColor}
+						options={backgroundColors}
+						onChange={(selected) =>
+							setFormState((prevState) => ({
+								...prevState,
+								backgroundColor: selected,
+							}))
+						}
+					/>
+					<Select
+						title='Ширина контента'
+						selected={formState.contentWidth}
+						options={contentWidthArr}
+						onChange={(selected) =>
+							setFormState((prevState) => ({
+								...prevState,
+								contentWidth: selected,
+							}))
+						}
+					/>
 					<div className={styles.bottomContainer}>
-						<Button title='Сбросить' htmlType='reset' type='clear' />
+						<Button
+							title='Сбросить'
+							htmlType='reset'
+							type='clear'
+							onClick={handleReset}
+						/>
 						<Button title='Применить' htmlType='submit' type='apply' />
 					</div>
 				</form>
@@ -18,3 +143,4 @@ export const ArticleParamsForm = () => {
 		</>
 	);
 };
+
