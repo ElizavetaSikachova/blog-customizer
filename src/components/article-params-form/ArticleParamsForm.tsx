@@ -5,6 +5,8 @@ import { Button } from 'src/ui/button';
 import { Select } from 'src/ui/select';
 import { RadioGroup } from 'src/ui/radio-group';
 import { Separator } from 'src/ui/separator';
+import { Text } from 'src/ui/text';
+import { useOutsideClickClose } from 'src/ui/select/hooks/useOutsideClickClose';
 import {
 	defaultArticleState,
 	ArticleStateType,
@@ -28,27 +30,18 @@ export const ArticleParamsForm = ({
 }: ArticleParamsFormProps) => {
 	const [isOpen, setIsOpen] = useState<boolean>(false);
 	const [formState, setFormState] = useState<ArticleStateType>(articleState);
-	const containerRef = useRef<HTMLElement>(null);
-	const overlayRef = useRef<HTMLDivElement>(null);
+	const containerRef = useRef<HTMLDivElement>(null);
+
+	useOutsideClickClose({
+		isOpen,
+		rootRef: containerRef,
+		onChange: setIsOpen,
+	});
 
 	// Синхронизируем formState с articleState при его изменении
 	useEffect(() => {
 		setFormState(articleState);
 	}, [articleState]);
-
-	// Управляем обработчиком клика по оверлею
-	useEffect(() => {
-		const handleOverlayClick = () => {
-			setIsOpen(false);
-		};
-
-		if (isOpen && overlayRef.current) {
-			overlayRef.current.addEventListener('click', handleOverlayClick);
-			return () => {
-				overlayRef.current?.removeEventListener('click', handleOverlayClick);
-			};
-		}
-	}, [isOpen]);
 
 	const handleArrowButtonClick = () => {
 		setIsOpen((prevState) => !prevState);
@@ -68,11 +61,17 @@ export const ArticleParamsForm = ({
 	return (
 		<>
 			<ArrowButton isOpen={isOpen} onClick={handleArrowButtonClick} />
-			{isOpen && <div className={styles.overlay} ref={overlayRef} />}
 			<aside
 				className={clsx(styles.container, { [styles.container_open]: isOpen })}
 				ref={containerRef}>
 				<form className={styles.form} onSubmit={handleApply}>
+					<Text
+						size={45}
+						weight={800}
+						uppercase
+						family='open-sans'>
+						Задайте параметры
+					</Text>
 					<Select
 						title='Шрифт'
 						selected={formState.fontFamilyOption}
