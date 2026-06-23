@@ -84,7 +84,6 @@ export const ArticleParamsForm = ({
 							}))
 						}
 					/>
-					<Separator />
 					<RadioGroup
 						title='Размер шрифта'
 						name='fontSize'
@@ -97,7 +96,6 @@ export const ArticleParamsForm = ({
 							}))
 						}
 					/>
-					<Separator />
 					<Select
 						title='Цвет шрифта'
 						selected={formState.fontColor}
@@ -121,12 +119,10 @@ export const ArticleParamsForm = ({
 							}))
 						}
 					/>
-					<Separator />
-					<RadioGroup
+					<Select
 						title='Ширина контента'
-						name='contentWidth'
-						options={contentWidthArr}
 						selected={formState.contentWidth}
+						options={contentWidthArr}
 						onChange={(selected) =>
 							setFormState((prevState) => ({
 								...prevState,
@@ -148,3 +144,4 @@ export const ArticleParamsForm = ({
 		</>
 	);
 };
+
